@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
-import productImage from "@/assets/product-spray.jpg";
+import productImage from "@/assets/product-spray-branded.jpg";
 
 const Products = () => {
   const products = [
