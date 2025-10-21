@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Sparkles, Moon, Leaf } from "lucide-react";
 import heroImage from "@/assets/hero-lavender.jpg";
-import productImage from "@/assets/product-spray.jpg";
+import productImage from "@/assets/product-spray-branded.jpg";
 
 const Home = () => {
   return (
