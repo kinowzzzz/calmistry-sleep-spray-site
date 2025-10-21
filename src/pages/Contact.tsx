@@ -5,6 +5,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, MessageCircle, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+// Contact form validation schema
+const contactSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  subject: z.string().trim().max(200, "Subject must be less than 200 characters").optional(),
+  message: z.string().trim().min(1, "Message is required").max(2000, "Message must be less than 2000 characters"),
+});
+
+// Newsletter validation schema
+const newsletterSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+});
 
 const Contact = () => {
   const { toast } = useToast();
@@ -14,32 +28,69 @@ const Contact = () => {
     subject: "",
     message: "",
   });
+  const [newsletterEmail, setNewsletterEmail] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.message) {
+    // Validate form data using zod schema
+    try {
+      const validatedData = contactSchema.parse(formData);
+      
+      // Here you would typically send the validated data to your backend
+      console.log("Validated form data:", validatedData);
+      
       toast({
-        title: "Please fill in all required fields",
-        variant: "destructive",
+        title: "Message sent!",
+        description: "We'll get back to you as soon as possible.",
       });
-      return;
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Show validation errors
+        const firstError = error.errors[0];
+        toast({
+          title: "Validation Error",
+          description: firstError.message,
+          variant: "destructive",
+        });
+      }
     }
+  };
 
-    // Here you would typically send the form data to your backend
-    toast({
-      title: "Message sent!",
-      description: "We'll get back to you as soon as possible.",
-    });
-
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    });
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate newsletter email
+    try {
+      const validatedData = newsletterSchema.parse({ email: newsletterEmail });
+      
+      // Here you would typically send the validated email to your backend
+      console.log("Validated newsletter email:", validatedData);
+      
+      toast({
+        title: "Subscribed!",
+        description: "Thank you for subscribing to our newsletter.",
+      });
+      
+      setNewsletterEmail("");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const firstError = error.errors[0];
+        toast({
+          title: "Validation Error",
+          description: firstError.message,
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleChange = (
@@ -79,6 +130,7 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Your name"
+                      maxLength={100}
                       required
                     />
                   </div>
@@ -94,6 +146,7 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="your.email@example.com"
+                      maxLength={255}
                       required
                     />
                   </div>
@@ -109,6 +162,7 @@ const Contact = () => {
                       value={formData.subject}
                       onChange={handleChange}
                       placeholder="What is this about?"
+                      maxLength={200}
                     />
                   </div>
 
@@ -123,6 +177,7 @@ const Contact = () => {
                       onChange={handleChange}
                       placeholder="Tell us how we can help..."
                       rows={6}
+                      maxLength={2000}
                       required
                     />
                   </div>
@@ -224,18 +279,15 @@ const Contact = () => {
                   Subscribe to get special offers and sleep tips
                 </p>
                 <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    toast({
-                      title: "Subscribed!",
-                      description: "Thank you for subscribing to our newsletter.",
-                    });
-                  }}
+                  onSubmit={handleNewsletterSubmit}
                   className="flex gap-2"
                 >
                   <Input
                     type="email"
                     placeholder="Enter your email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    maxLength={255}
                     required
                   />
                   <Button type="submit" variant="hero">
